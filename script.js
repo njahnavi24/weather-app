@@ -1,11 +1,14 @@
 async function getWeather(city) {
   try {
-    const formattedCity = encodeURIComponent(city.trim());
+    // Free OpenWeather API Key
+    const apiKey = "b1b15e88fa797225412429c1c50c122a1";
     const response = await fetch(
-      `https://weather-proxy.freecodecamp.rocks/api/city/${formattedCity}`
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`
     );
 
-    if (!response.ok) throw new Error("Network response failed");
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
 
     const data = await response.json();
     return data;
@@ -17,40 +20,30 @@ async function getWeather(city) {
 
 async function showWeather(city) {
   if (!city) {
-    alert("Please select a valid city from the dropdown.");
+    alert("Please select a city from the dropdown.");
     return;
   }
 
   const data = await getWeather(city);
 
-  if (!data) {
-    alert("Something went wrong, please try again later.");
+  if (!data || !data.main) {
+    alert(`Could not fetch weather data for "${city}". Please try again.`);
     return;
   }
 
-  document.getElementById("weather-icon").src =
-    data.weather?.[0]?.icon || "";
+  // Display OpenWeather weather icon
+  const iconCode = data.weather?.[0]?.icon;
+  document.getElementById("weather-icon").src = iconCode
+    ? `https://openweathermap.org/img/wn/${iconCode}@2x.png`
+    : "";
 
-  document.getElementById("main-temperature").textContent =
-    data.main?.temp ?? "N/A";
-
-  document.getElementById("feels-like").textContent =
-    data.main?.feels_like ?? "N/A";
-
-  document.getElementById("humidity").textContent =
-    data.main?.humidity ?? "N/A";
-
-  document.getElementById("wind").textContent =
-    data.wind?.speed ?? "N/A";
-
-  document.getElementById("wind-gust").textContent =
-    data.wind?.gust ?? "N/A";
-
-  document.getElementById("weather-main").textContent =
-    data.weather?.[0]?.main ?? "N/A";
-
-  document.getElementById("location").textContent =
-    data.name ?? "N/A";
+  document.getElementById("main-temperature").textContent = Math.round(data.main.temp);
+  document.getElementById("feels-like").textContent = Math.round(data.main.feels_like);
+  document.getElementById("humidity").textContent = data.main.humidity;
+  document.getElementById("wind").textContent = data.wind?.speed ?? "N/A";
+  document.getElementById("wind-gust").textContent = data.wind?.gust ?? "0";
+  document.getElementById("weather-main").textContent = data.weather?.[0]?.main ?? "N/A";
+  document.getElementById("location").textContent = data.name;
 }
 
 document
@@ -59,3 +52,4 @@ document
     const city = document.getElementById("city").value;
     showWeather(city);
   });
+  
