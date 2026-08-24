@@ -1,37 +1,37 @@
 async function getWeather(city) {
   try {
-    // Free OpenWeather API Key
+    // OpenWeather API Direct Call
     const apiKey = "b1b15e88fa797225412429c1c50c122a1";
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`
-    );
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+    
+    const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      throw new Error(`API Error: ${response.status}`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Fetch error:", error);
+    console.error("Fetch error details:", error);
     return null;
   }
 }
 
 async function showWeather(city) {
   if (!city) {
-    alert("Please select a city from the dropdown.");
+    alert("Please select a valid city.");
     return;
   }
 
   const data = await getWeather(city);
 
   if (!data || !data.main) {
-    alert(`Could not fetch weather data for "${city}". Please try again.`);
+    alert(`Could not fetch weather data for "${city}". Open Console (F12) to see error.`);
     return;
   }
 
-  // Display OpenWeather weather icon
+  // Update Weather Card Elements
   const iconCode = data.weather?.[0]?.icon;
   document.getElementById("weather-icon").src = iconCode
     ? `https://openweathermap.org/img/wn/${iconCode}@2x.png`
@@ -46,10 +46,7 @@ async function showWeather(city) {
   document.getElementById("location").textContent = data.name;
 }
 
-document
-  .getElementById("get-weather-btn")
-  .addEventListener("click", function () {
-    const city = document.getElementById("city").value;
-    showWeather(city);
-  });
-  
+document.getElementById("get-weather-btn").addEventListener("click", function () {
+  const city = document.getElementById("city").value;
+  showWeather(city);
+});
